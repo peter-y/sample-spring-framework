@@ -4,10 +4,14 @@ import com.geolisa.bean.City;
 import com.geolisa.bean.mapper.CityMapper;
 import com.geolisa.service.CityMapperService;
 import java.util.List;
+import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -21,6 +25,13 @@ public class CityMapperServiceImpl implements CityMapperService {
 
     @Autowired
     CityMapper cityMapper;
+
+    @Autowired
+    RedisOperations<String,String> redisTemplate;
+
+    //说是能这么注入
+    @Resource(name="redisTemplate")
+    private ListOperations<String, String> listOps;
 
     /**
      * 插入城市信息.

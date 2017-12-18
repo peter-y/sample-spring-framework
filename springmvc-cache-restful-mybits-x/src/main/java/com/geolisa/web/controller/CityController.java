@@ -63,7 +63,7 @@ public class CityController {
 
     /**
      * 通过城市ID 获取城市信息.
-     *
+     * get的时候可以获取一个缓存
      * @param cityId 城市id
      * @return 单个城市信息
      */
