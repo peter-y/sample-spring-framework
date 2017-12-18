@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+    <context:component-scan base-package="com.geolisa.web.controller,com.geolisa.exception"/>
+    <mvc:annotation-driven>
+        <!--<mvc:message-converters>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" p:objectMapper-ref="objectMapper"/>
+            <bean class="org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter" p:objectMapper-ref="xmlMapper"/>
+        </mvc:message-converters>-->
+    </mvc:annotation-driven>
+    <mvc:interceptors>
+        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
+    </mvc:interceptors>
+    <!-- 文件上传下载 -->
+    <bean id="multipartResolver"
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="utf-8"/>
+        <property name="maxUploadSize" value="10485760000"/>
+        <property name="maxInMemorySize" value="40960"/>
+    </bean>
+    <mvc:default-servlet-handler/>
+    <bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="contentType" value="text/html"/>
+        <property name="prefix" value="/WEB-INF/view/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!-- StringConverter 只会处理controller 结果是String.class 类型的数据  -->
+    <bean id="stringConverter" class="org.springframework.http.converter.StringHttpMessageConverter"
+        p:supportedMediaTypes="text/plain;charset=utf-8"/>
+
+    <bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
+        p:simpleDateFormat="yyyy-MM-dd HH:mm:ss"
+        p:indentOutput="true">
+        <property name="featuresToDisable">
+            <array>
+                <util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS"/>
+            </array>
+        </property>
+    </bean>
+    <!--<bean id="xmlMapper" parent="objectMapper" p:createXmlMapper="true"/>-->
+
+    <!-- 处理参考AbstractMessageConverterMethodProcessor -->
+    <!-- 貌似会自动支持一些类型 如application/xml -->
+    <!-- dispatchservlet在控制器之前会检查 accept类型，控制器处理完成之后也会遍历一遍converter 找对应的内容转换器，没有的话就会报一个406(ResponseStatusExceptionResolver 会处理异常) -->
+    <!-- 每个converter中都会实现一个canWrite方法来比较预期的mediaType 和 配置的 supportedMediaTypes -->
+
+    <bean id="jackson2Converter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <property name="objectMapper" ref="objectMapper"/>
+        <property name="supportedMediaTypes">
+            <list>
+                <value type="java.lang.String">application/json;charset=utf-8</value>
+            </list>
+        </property>
+    </bean>
+    <!-- xml 的解析 现在有3种，jackson2xml jaxb xstream-->
+    <!-- 这个用restclient 端来调用的时候，总是显示内容解析出错，但是看内容貌似没啥问题，不知道为什么 -->
+    <bean id="marshallingMappingConverter" class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter"
+        p:marshaller-ref="jaxbMarshaller" p:unmarshaller-ref="jaxbMarshaller" p:supportedMediaTypes="application/xml"/>
+    <bean id="jaxbMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller" p:packagesToScan="com.geolisa.web.model"/>
+    <bean id="handlerMapping" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>
+    <bean id="handlerAdapter" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <ref bean="stringConverter"/>
+                <ref bean="jackson2Converter"/>
+                <ref bean="marshallingMappingConverter"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>
