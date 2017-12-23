@@ -2,8 +2,11 @@ package com.geolisa.bean;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import java.io.Serializable;
 
-public class City {
+public class City implements Serializable {
+
+    private static final long serialVersionUID = 6437346039309818615L;
     private Long id;
     private String cityCode;//城市代码 4位阿拉伯数字
     private String provinceCode;//所在省份代码

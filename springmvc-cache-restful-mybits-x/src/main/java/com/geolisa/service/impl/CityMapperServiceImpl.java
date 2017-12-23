@@ -4,14 +4,12 @@ import com.geolisa.bean.City;
 import com.geolisa.bean.mapper.CityMapper;
 import com.geolisa.service.CityMapperService;
 import java.util.List;
-import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -26,18 +24,19 @@ public class CityMapperServiceImpl implements CityMapperService {
     @Autowired
     CityMapper cityMapper;
 
-    @Autowired
-    RedisOperations<String,String> redisTemplate;
-
-    //说是能这么注入
-    @Resource(name="redisTemplate")
-    private ListOperations<String, String> listOps;
+//    @Autowired
+//    RedisOperations<String,String> redisTemplate;
+//
+//    //说是能这么注入
+//    @Resource(name="redisTemplate")
+//    private ListOperations<String, String> listOps;
 
     /**
      * 插入城市信息.
      *
      * @return 城市信息
      */
+    @CacheEvict(value = "City", key = "#root.methodName", allEntries = true)
     public City insertCity(City city) {
         Assert.notNull(city, "city is null");
         Assert.notNull(city.getCityCode(), "cityCode is null");
@@ -61,6 +60,7 @@ public class CityMapperServiceImpl implements CityMapperService {
      *
      * @param code 城市代码
      */
+    @Cacheable(value = "City", key = "#root.methodName")
     public City getCityByCode(String code) {
         Assert.notNull(code, "code is null");
         City city = cityMapper.getCityByCode(code);
@@ -72,6 +72,7 @@ public class CityMapperServiceImpl implements CityMapperService {
      *
      * @param id 城市id
      */
+    @Cacheable(value = "City", key = "#root.methodName")
     public City getCityById(Long id) {
         Assert.notNull(id, "id is null");
         City city = cityMapper.getCityById(id);
@@ -91,6 +92,7 @@ public class CityMapperServiceImpl implements CityMapperService {
      *
      * @param id 需要删除的城市id
      */
+    @CacheEvict(value = {"getCityById", "getCityByCode"}, allEntries = true)
     public void deleteCity(Long id) {
         cityMapper.deleteCity(id);
     }
@@ -100,6 +102,7 @@ public class CityMapperServiceImpl implements CityMapperService {
      *
      * @param city 城市的具体信息
      */
+    @CacheEvict(value = {"getCityById", "getCityByCode"}, allEntries = true)
     public City updateCity(City city) {
         Assert.notNull(city, "city is null");
         cityMapper.updateCity(city);
