@@ -23,6 +23,7 @@
         <logback.version>1.2.3</logback.version>
         <mybatis.version>3.4.5</mybatis.version>
         <jackson.version>2.9.3</jackson.version>
+        <shiro.version>1.4.0</shiro.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -48,7 +49,14 @@
                 <artifactId>aspectjweaver</artifactId>
                 <version>1.8.11</version>
             </dependency>
+            <!-- shiro 接入权限 回头看看spring security 怎么样 -->
+            <dependency>
+                <groupId>org.apache.shiro</groupId>
+                <artifactId>shiro-core</artifactId>
+                <version>${shiro.version}</version>
+            </dependency>
 
+            <!-- spring data 接入 redis -->
             <dependency>
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-redis</artifactId>
@@ -59,6 +67,7 @@
                 <artifactId>jedis</artifactId>
                 <version>2.9.0</version>
             </dependency>
+            <!-- 消息队列 -->
             <dependency>
                 <groupId>org.apache.activemq</groupId>
                 <artifactId>activemq-broker</artifactId>
@@ -74,6 +83,7 @@
                 <artifactId>activemq-pool</artifactId>
                 <version>${activemq.version}</version>
             </dependency>
+            <!-- 持久化 -->
             <dependency>
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis</artifactId>

@@ -21,8 +21,6 @@
     <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate"
         p:connectionFactory-ref="jedisConnectionFactory" p:defaultSerializer-ref="redisStringSerializer"/>
 
-
-
     <bean id="cacheWriter" class="org.springframework.data.redis.cache.DefaultRedisCacheWriter" factory-method="lockingRedisCacheWriter">
         <constructor-arg name="connectionFactory" ref="jedisConnectionFactory"/>
     </bean>
