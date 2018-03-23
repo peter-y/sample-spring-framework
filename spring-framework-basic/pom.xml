@@ -53,6 +53,10 @@
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
         </dependency>
+        <!-- 这个好像是为了引入@AspectJ注解特性而依赖的 xml中需要<aop:aspectj-autoproxy/>声明 注解开启@EnableAspectJAutoProxy -->
+        <!-- AspectJ项目引入了@AspectJ注解风格，而spring可能是为了保持一致，也采用了这种方式，所以如果使用注解的话
+         需要引入aspectjweaver包，但是可以不使用AspectJ的编译和代码织入，而仅依靠spring aop代理接口(JDK动态代理)或类(CGLIB)的方式-->
+        <!-- spring相信 aop和AspectJ项目是互补的关系，AspectJ更全面，颗粒度更细，而springAOP能满足大部分的需求 -->
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>

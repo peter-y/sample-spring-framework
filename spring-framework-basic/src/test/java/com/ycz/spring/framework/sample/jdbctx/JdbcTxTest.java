@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -22,7 +25,7 @@ import org.testng.annotations.Test;
 
 @Test
 @Configuration
-@ContextConfiguration(locations = "classpath:spring/spring-datasource.xml")
+@ContextConfiguration(locations = "classpath:spring/spring-tx.xml")
 public class JdbcTxTest extends AbstractTestNGSpringContextTests {
 
     private Logger logger = LoggerFactory.getLogger(JdbcTxTest.class);
@@ -35,6 +38,14 @@ public class JdbcTxTest extends AbstractTestNGSpringContextTests {
 
     @Inject
     JdbcOperations jdbcOperations;
+
+    //是比jdbc 高级的方法 适合多个参数配置调用
+    NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    //更高级 元数据处理基于JDBC的DatabaseMetaData 啥的 貌似给个表名 和 map 参数映射就能行
+    SimpleJdbcInsert simpleJdbcInsert;
+
+    SimpleJdbcCall simpleJdbcCall;
 
     @Autowired
     JdbcTestUserService jdbcTestUserService;
@@ -86,9 +97,12 @@ public class JdbcTxTest extends AbstractTestNGSpringContextTests {
     //没有自动配置事务，手动的操作事务 数据库的连接和关闭交给了jdbcTemplate
     public void testNoTxInsert() {
         logger.debug("todo testNoTxInsert");
-        //0是默认的
-        TransactionDefinition transactionDefinition = new DefaultTransactionDefinition(0);
-        TransactionStatus status = transactionManager.getTransaction(transactionDefinition);
+        //0是默认的 这里面也可以定义事务行为
+        DefaultTransactionDefinition t1 = new DefaultTransactionDefinition();
+        t1.setName("tx1");
+        t1.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+        t1.setIsolationLevel(TransactionDefinition.ISOLATION_DEFAULT);
+        TransactionStatus status = transactionManager.getTransaction(t1);
         try {
             jdbcTestUserService.noTxDefInsertUser(
                 "INSERT INTO test_user (id,email,nick_name,password,register_time,username) VALUES (4,'zhang@gg.com','xiaomi','123','2018-03-22','zhang_gg')");
