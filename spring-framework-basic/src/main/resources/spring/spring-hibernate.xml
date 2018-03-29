@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url"
+            value="jdbc:mysql://192.168.1.91:3306/youngdb?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true"/>
+        <property name="username" value="root"/>
+        <property name="password" value="1q2w3e4r5t"/>
+        <property name="defaultAutoCommit" value="false"/>
+        <property name="minIdle" value="3"/>
+        <property name="initialSize" value="3"/>
+        <property name="maxTotal" value="10"/>
+        <property name="maxIdle" value="10"/>
+    </bean>
+
+    <bean id="mySessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mappingLocations" value="classpath:hibernate/*.xml"/>
+        <property name="hibernateProperties">
+            <value>hibernate.dialect=org.hibernate.dialect.HSQLDialect</value>
+        </property>
+    </bean>
+
+    <bean id="hibernateTransacationManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- 可以使用aop 切入代理事务  也可以 直接声明注解扫描 需要代码上添加注解@Transactional -->
+    <tx:annotation-driven transaction-manager="hibernateTransacationManager"/>
+
+</beans>

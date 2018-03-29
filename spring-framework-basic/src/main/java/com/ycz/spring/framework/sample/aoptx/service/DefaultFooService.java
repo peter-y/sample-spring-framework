@@ -47,6 +47,7 @@ public class DefaultFooService implements FooService {
         doSqlInsert("insert into foo (name,barname) values (\"" + foo.getName() + "\",\"" + foo.getBarName() + "\")");
         //套了一个 手动开事务的 并失败
         doCreateFooHasException(foo);
+
     }
 
     @Override

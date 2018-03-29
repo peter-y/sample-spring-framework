@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <!-- datasource 使用嵌入式数据库 h2-->
+    <jdbc:embedded-database database-name="h2testDB" id="dataSource" type="H2" generate-name="true">
+        <jdbc:script location="classpath:embedded-db/drop-table.sql"/>
+    </jdbc:embedded-database>
+    <!-- 初始化datasource -->
+    <jdbc:initialize-database data-source="dataSource">
+        <jdbc:script location="classpath:embedded-db/create-table.sql"/>
+        <jdbc:script location="classpath:embedded-db/init-data.sql"/>
+    </jdbc:initialize-database>
+    <!-- transactionManager 事务管理器aop -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" c:dataSource-ref="dataSource" p:defaultTimeout="30"/>
+
+    <aop:config>
+        <aop:pointcut id="pointcut" expression="execution(* com.ycz.spring.framework.sample.aoptx.service.*.*(..))"/>
+        <aop:advisor advice-ref="transactionInterceptor" pointcut-ref="pointcut"/>
+    </aop:config>
+
+    <tx:advice id="transactionInterceptor" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- jdbcTemplate 注入datasource -->
+    <bean id="jdbcOperation" class="org.springframework.jdbc.core.JdbcTemplate" c:dataSource-ref="dataSource"/>
+
+    <bean id="transactionOperations" class="org.springframework.transaction.support.TransactionTemplate" c:transactionManager-ref="txManager"/>
+    <!-- service bean -->
+    <bean id="fooService" class="com.ycz.spring.framework.sample.aoptx.service.DefaultFooService"/>
+</beans>
